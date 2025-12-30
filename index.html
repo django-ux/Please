@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Can I Court You?</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f9c5d1 0%, #c2e9fb 100%);
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            text-align: center;
+            transition: background 0.5s;
+        }
+        
+        .container {
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+        
+        .gif-container {
+            margin: 30px auto;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .main-gif {
+            max-width: 400px;
+            max-height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .buttons {
+            margin-top: 40px;
+            position: relative;
+            z-index: 20;
+        }
+        
+        #yesBtn {
+            font-size: 24px;
+            padding: 20px 50px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            position: relative;
+            z-index: 100;
+        }
+        
+        #noBtn {
+            font-size: 24px;
+            padding: 20px 50px;
+            margin: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .random-gif {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+            max-width: 150px;
+            max-height: 150px;
+            opacity: 0;
+            animation: fadeInOut 8s linear forwards;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: scale(0.5); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        
+        .celebration-text {
+            font-size: 50px;
+            color: black;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+            display: none;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        
+        /* New class for celebration container */
+        .celebration-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="questionText">Can We Have 10 Babies? 🥺🥺</h1>
+        
+        <div class="gif-container">
+            <img id="mainGif" src="https://tenor.com/view/erm-fingers-hmmm-cat-guilty-gif-16022705.gif" alt="Thinking cat" class="main-gif">
+            <div class="celebration-text" id="celebrationText">Yesss! I knew it! You would say yes!</div>
+        </div>
+        
+        <div class="buttons">
+            <button id="yesBtn">YES</button>
+            <button id="noBtn">NO</button>
+        </div>
+    </div>
+
+    <script>
+        // Updated GIF URLs as you requested
+        const gifStages = [
+            {
+                url: "https://tenor.com/view/ami-b%E1%BB%A5ng-b%E1%BB%B1-gif-11248501321735682910.gif",
+                text: "Try again"
+            },
+            {
+                url: "https://tenor.com/view/please-one-more-hamudi-are-you-the-one-s9-e10-one-more-chance-gif-3185835546859376984.gif",
+                text: "You might regret it"
+            },
+            {
+                url: "https://tenor.com/view/%D8%A7%D8%AA%D9%88%D8%B3%D9%84-%D8%A7%D9%84%D9%8A%D9%83-%D8%A7%D8%B1%D8%AC%D9%88%D9%83-tawfikiya-please-begging-gif-5839305187445638562.gif",
+                text: "Pleaseee one more"
+            },
+            {
+                url: "https://tenor.com/view/give-me-another-chance-lamar-freeman-tales-renee-s3e2-gif-26489745.gif",
+                text: "One more"
+            }
+        ];
+        
+        // Updated celebration GIFs
+        const celebrationGifs = [
+            "https://tenor.com/view/ufc-gif-601345209739991140.gif",
+            "https://tenor.com/view/hd-smirk-gif-7206957141966421326.gif",
+            "https://tenor.com/view/smirk-eyebrow-smirker-smirking-hey-there-gif-7318362067125235120.gif",
+            "https://tenor.com/view/smug-smirk-with-rose-emoticon-emoticon-gif-12940359974901156411.gif",
+            "https://tenor.com/view/dog-smirk-dog-smirking-evil-gif-1174039551531775064.gif"
+        ];
+        
+        // DOM elements
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const mainGif = document.getElementById('mainGif');
+        const questionText = document.getElementById('questionText');
+        const celebrationText = document.getElementById('celebrationText');
+        const body = document.body;
+        const gifContainer = document.querySelector('.gif-container');
+        
+        // Game state
+        let noClickCount = 0;
+        let yesBtnScale = 1;
+        let gameActive = true;
+        
+        // NO button click handler
+        noBtn.addEventListener('click', function() {
+            if (!gameActive) return;
+            
+            // Increase Yes button size
+            yesBtnScale += 0.3;
+            yesBtn.style.transform = `scale(${yesBtnScale})`;
+            
+            // Update stage based on click count
+            if (noClickCount < gifStages.length) {
+                const stage = gifStages[noClickCount];
+                mainGif.src = stage.url;
+                questionText.textContent = stage.text;
+                noClickCount++;
+            } else {
+                // Yes button covers screen
+                yesBtn.style.position = 'fixed';
+                yesBtn.style.top = '0';
+                yesBtn.style.left = '0';
+                yesBtn.style.width = '100vw';
+                yesBtn.style.height = '100vh';
+                yesBtn.style.borderRadius = '0';
+                yesBtn.style.zIndex = '1000';
+                yesBtn.style.fontSize = '10vw';
+                yesBtn.style.transform = 'none';
+                mainGif.style.display = 'none';
+                questionText.style.display = 'none';
+                noBtn.style.display = 'none';
+            }
+        });
+        
+        // YES button click handler
+        yesBtn.addEventListener('click', function() {
+            if (!gameActive) return;
+            
+            gameActive = false;
+            
+            // Hide original question text
+            questionText.style.display = 'none';
+            
+            // Show celebration text above the GIF
+            celebrationText.style.display = 'block';
+            
+            // Update the GIF to celebration GIF
+            mainGif.src = "https://tenor.com/view/ufc-gif-601345209739991140.gif";
+            
+            // Hide buttons
+            noBtn.style.display = 'none';
+            yesBtn.style.display = 'none';
+            
+            // Change background
+            body.style.background = "linear-gradient(135deg, #ff4081 0%, #00bcd4 100%)";
+            
+            // Create random celebration GIFs
+            createRandomGifs();
+            
+            // Add more GIFs every 2 seconds for 10 seconds
+            let gifInterval = setInterval(createRandomGifs, 2000);
+            setTimeout(() => clearInterval(gifInterval), 10000);
+        });
+        
+        // Function to create random GIFs
+        function createRandomGifs() {
+            for (let i = 0; i < 5; i++) {
+                const randomGif = document.createElement('img');
+                const randomIndex = Math.floor(Math.random() * celebrationGifs.length);
+                
+                randomGif.src = celebrationGifs[randomIndex];
+                randomGif.className = 'random-gif';
+                
+                // Random position
+                const posX = Math.random() * (window.innerWidth - 150);
+                const posY = Math.random() * (window.innerHeight - 150);
+                
+                randomGif.style.left = `${posX}px`;
+                randomGif.style.top = `${posY}px`;
+                
+                // Random size
+                const size = 80 + Math.random() * 70;
+                randomGif.style.width = `${size}px`;
+                randomGif.style.height = 'auto';
+                
+                // Random animation delay
+                randomGif.style.animationDelay = `${Math.random() * 2}s`;
+                
+                document.body.appendChild(randomGif);
+                
+                // Remove after animation completes
+                setTimeout(() => {
+                    if (randomGif.parentNode) {
+                        randomGif.parentNode.removeChild(randomGif);
+                    }
+                }, 8000);
+            }
+        }
+        
+        // Prevent right-click on GIFs
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+            }
+        });
+        
+        // Error handling for GIFs
+        mainGif.onerror = function() {
+            console.error("Failed to load GIF:", mainGif.src);
+        };
+        
+        // Test all GIF URLs
+        window.addEventListener('load', function() {
+            console.log("Total GIFs loaded:");
+            console.log("1. Initial:", mainGif.src);
+            gifStages.forEach((stage, index) => {
+                console.log(`${index + 2}. Stage ${index}:`, stage.url);
+            });
+            console.log("Celebration GIFs:", celebrationGifs.length, "total");
+        });
+    </script>
+</body>
+</html>
